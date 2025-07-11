@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据统计分析工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            font-family: monospace;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .hint {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .clear-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            min-width: 100px;
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .results {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e1e8f0;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .stat-value {
+            font-size: 1.4em;
+            color: #667eea;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .data-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .error {
+            background: #ffe6e6;
+            color: #d63031;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #d63031;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .formula-note {
+            background: #f0f8ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #0066cc;
+        }
+
+        .formula-note h3 {
+            margin-bottom: 10px;
+            color: #004499;
+        }
+
+        .formula-note ul {
+            margin-left: 20px;
+        }
+
+        .formula-note li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 数据统计分析工具</h1>
+        
+        <div class="input-section">
+            <label for="dataInput">请输入数据：</label>
+            <textarea id="dataInput" placeholder="请输入数字，可以用空格、逗号、换行等分隔，例如：&#10;1 2 3 4 5&#10;或&#10;1, 2, 3, 4, 5&#10;或&#10;1&#10;2&#10;3&#10;4&#10;5"></textarea>
+            <div class="hint">支持多种分隔符：空格、逗号、分号、换行符等</div>
+        </div>
+
+        <div class="button-group">
+            <button class="calculate-btn" onclick="calculateStats()">🧮 计算统计量</button>
+            <button class="clear-btn" onclick="clearAll()">🗑️ 清空</button>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="results" class="results" style="display: none;">
+            <h2>📈 统计结果</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">📏 数据个数 (n)</div>
+                    <div class="stat-value" id="count">-</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">📊 均值 (x̄)</div>
+                    <div class="stat-value" id="mean">-</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">📈 方差 (σ²)</div>
+                    <div class="stat-value" id="variance">-</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">📉 标准差 (σ)</div>
+                    <div class="stat-value" id="stdDev">-</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">🎯 极差 (R)</div>
+                    <div class="stat-value" id="range">-</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-label">⚖️ 变异系数 (CV)</div>
+                    <div class="stat-value" id="cv">-</div>
+                </div>
+            </div>
+
+            <div class="data-info">
+                <div>最小值：<span id="minValue">-</span> | 最大值：<span id="maxValue">-</span></div>
+                <div style="margin-top: 8px;">数据范围：[<span id="dataRange">-</span>]</div>
+            </div>
+        </div>
+
+        <div class="formula-note">
+            <h3>📝 计算公式说明：</h3>
+            <ul>
+                <li><strong>均值</strong>：x̄ = Σx / n</li>
+                <li><strong>方差</strong>：σ² = Σ(x - x̄)² / n</li>
+                <li><strong>标准差</strong>：σ = √(σ²)</li>
+                <li><strong>极差</strong>：R = max(x) - min(x)</li>
+                <li><strong>变异系数</strong>：CV = (σ / x̄) × 100%</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function parseData(input) {
+            // 清理输入并分割数据
+            const cleanInput = input.trim();
+            if (!cleanInput) {
+                throw new Error('请输入数据');
+            }
+
+            // 使用多种分隔符进行分割
+            const numbers = cleanInput
+                .split(/[\s,;，；\n\r\t]+/)
+                .filter(item => item.trim() !== '')
+                .map(item => {
+                    const num = parseFloat(item.trim());
+                    if (isNaN(num)) {
+                        throw new Error(`"${item}" 不是有效的数字`);
+                    }
+                    return num;
+                });
+
+            if (numbers.length === 0) {
+                throw new Error('没有找到有效的数字');
+            }
+
+            if (numbers.length === 1) {
+                throw new Error('至少需要2个数据才能计算统计量');
+            }
+
+            return numbers;
+        }
+
+        function calculateStats() {
+            const input = document.getElementById('dataInput').value;
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+
+            // 隐藏之前的错误和结果
+            errorDiv.style.display = 'none';
+            resultsDiv.style.display = 'none';
+
+            try {
+                const data = parseData(input);
+                const n = data.length;
+
+                // 计算均值
+                const mean = data.reduce((sum, x) => sum + x, 0) / n;
+
+                // 计算方差（总体方差）
+                const variance = data.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / n;
+
+                // 计算标准差
+                const stdDev = Math.sqrt(variance);
+
+                // 计算极差
+                const min = Math.min(...data);
+                const max = Math.max(...data);
+                const range = max - min;
+
+                // 计算变异系数
+                const cv = mean !== 0 ? (stdDev / Math.abs(mean)) * 100 : 0;
+
+                // 显示结果
+                document.getElementById('count').textContent = n;
+                document.getElementById('mean').textContent = mean.toFixed(6);
+                document.getElementById('variance').textContent = variance.toFixed(6);
+                document.getElementById('stdDev').textContent = stdDev.toFixed(6);
+                document.getElementById('range').textContent = range.toFixed(6);
+                document.getElementById('cv').textContent = cv.toFixed(4) + '%';
+                document.getElementById('minValue').textContent = min.toFixed(6);
+                document.getElementById('maxValue').textContent = max.toFixed(6);
+                document.getElementById('dataRange').textContent = `${min.toFixed(6)}, ${max.toFixed(6)}`;
+
+                resultsDiv.style.display = 'block';
+
+                // 添加动效
+                resultsDiv.style.opacity = '0';
+                resultsDiv.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    resultsDiv.style.transition = 'all 0.5s ease';
+                    resultsDiv.style.opacity = '1';
+                    resultsDiv.style.transform = 'translateY(0)';
+                }, 10);
+
+            } catch (error) {
+                errorDiv.textContent = '❌ 错误：' + error.message;
+                errorDiv.style.display = 'block';
+                
+                // 添加错误动效
+                errorDiv.style.opacity = '0';
+                setTimeout(() => {
+                    errorDiv.style.transition = 'opacity 0.3s ease';
+                    errorDiv.style.opacity = '1';
+                }, 10);
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('dataInput').value = '';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('dataInput').focus();
+        }
+
+        // 添加键盘事件监听
+        document.getElementById('dataInput').addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'Enter') {
+                calculateStats();
+            }
+        });
+
+        // 页面加载完成后聚焦到输入框
+        window.addEventListener('load', function() {
+            document.getElementById('dataInput').focus();
+        });
+
+        // 添加实时输入提示
+        document.getElementById('dataInput').addEventListener('input', function() {
+            const input = this.value.trim();
+            if (input) {
+                try {
+                    const data = parseData(input);
+                    document.querySelector('.hint').textContent = `已识别 ${data.length} 个数字 (按 Ctrl+Enter 快速计算)`;
+                    document.querySelector('.hint').style.color = '#28a745';
+                } catch (error) {
+                    document.querySelector('.hint').textContent = '数据格式有误：' + error.message;
+                    document.querySelector('.hint').style.color = '#dc3545';
+                }
+            } else {
+                document.querySelector('.hint').textContent = '支持多种分隔符：空格、逗号、分号、换行符等';
+                document.querySelector('.hint').style.color = '#888';
+            }
+        });
+    </script>
+</body>
+</html>
